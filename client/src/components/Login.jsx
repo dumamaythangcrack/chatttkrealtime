@@ -7,20 +7,35 @@ export default function Login({ setToken, setUser }) {
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
 
-  const handleSubmit = async () => {
-    try {
-      const url = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'
-      const res = await axios.post(`${url}/api/${isLogin ? 'login' : 'register'}`, {
-        email, password, displayName
-      })
-      localStorage.setItem('token', res.data.token)
-      localStorage.setItem('user', JSON.stringify(res.data.user))
-      setToken(res.data.token)
-      setUser(res.data.user)
-    } catch (err) {
-      alert(err.response?.data?.error || 'Lỗi kết nối')
-    }
+ const handleSubmit = async () => {
+  try {
+    const url = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'
+    const endpoint = isLogin ? 'login' : 'register'
+    const payload = isLogin 
+      ? { email, password } 
+      : { email, password, displayName }
+
+    const res = await axios.post(`${url}/api/${endpoint}`, payload)
+
+    // Lưu vào localStorage
+    localStorage.setItem('token', res.data.token)
+    localStorage.setItem('user', JSON.stringify(res.data.user))
+
+    // Cập nhật state cha (App.jsx)
+    setToken(res.data.token)
+    setUser(res.data.user)
+
+    // Thông báo đẹp thay vì alert thô
+    alert(`Chào mừng ${res.data.user.displayName || res.data.user.email} đã ${isLogin ? 'đăng nhập' : 'đăng ký'} thành công!`)
+    
+    // Nếu muốn tự động chuyển trang thì thêm dòng này cũng được:
+    // window.location.href = '/'   hoặc dùng navigate nếu có react-router
+
+  } catch (err) {
+    const msg = err.response?.data?.error || 'Lỗi kết nối server'
+    alert(msg)
   }
+}
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-base-300">
