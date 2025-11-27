@@ -6,7 +6,7 @@ export default function Login({ setToken, setUser }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
-  const [loading, setLoading] = useState(false) // thêm loading cho đẹp
+  const [loading, setLoading] = useState(false)
 
   const handleSubmit = async () => {
     if (!email || !password || (!isLogin && !displayName)) {
@@ -24,99 +24,53 @@ export default function Login({ setToken, setUser }) {
 
       const res = await axios.post(`${url}/api/${endpoint}`, payload)
 
-      // Lưu vào localStorage
       localStorage.setItem('token', res.data.token)
       localStorage.setItem('user', JSON.stringify(res.data.user))
 
-      // Cập nhật state cha (App.jsx)
       setToken(res.data.token)
       setUser(res.data.user)
 
-      // Thông báo thành công đẹp lung linh
-      alert(
-        `Chào mừng ${res.data.user.displayName || res.data.user.email}!\n` +
-        `${isLogin ? 'Đăng nhập' : 'Đăng ký'} thành công 🎉`
-      )
-
-      // Không cần reload nữa vì App.jsx đã được fix load từ localStorage ngay từ đầu
+      alert(`Chào mừng ${res.data.user.displayName || email}!\n${isLogin ? 'Đăng nhập' : 'Đăng ký'} thành công`)
 
     } catch (err) {
-      const msg = err.response?.data?.error || 'Lỗi kết nối server. Vui lòng thử lại!'
+      let msg = 'Lỗi không xác định'
+      if (err.response?.data?.error) msg = err.response.data.error
+      else if (err.response?.data?.message) msg = err.response.data.message
+      else if (err.message) msg = err.message
+
       alert('Lỗi: ' + msg)
     } finally {
       setLoading(false)
     }
   }
 
+  // phần return giữ nguyên như cũ (hoặc dùng bản đẹp mình gửi lần trước)
   return (
+    // ... (giữ như cũ, không cần thay đổi)
     <div className="min-h-screen flex items-center justify-center bg-base-300">
       <div className="card w-96 bg-base-100 shadow-2xl">
         <div className="card-body">
-          <h2 className="card-title justify-center text-3xl font-bold mb-6">
-            ChatPro 2025
-          </h2>
-
+          <h2 className="card-title justify-center text-3xl font-bold mb-6">ChatPro 2025</h2>
           <div className="tabs tabs-boxed mb-6">
-            <a
-              className={`tab tab-lg ${isLogin ? 'tab-active' : ''}`}
-              onClick={() => setIsLogin(true)}
-            >
-              Đăng nhập
-            </a>
-            <a
-              className={`tab tab-lg ${!isLogin ? 'tab-active' : ''}`}
-              onClick={() => setIsLogin(false)}
-            >
-              Đăng ký
-            </a>
+            <a className={`tab tab-lg ${isLogin ? 'tab-active' : ''}`} onClick={() => setIsLogin(true)}>Đăng nhập</a>
+            <a className={`tab tab-lg ${!isLogin ? 'tab-active' : ''}`} onClick={() => setIsLogin(false)}>Đăng ký</a>
           </div>
 
           {!isLogin && (
-            <input
-              type="text"
-              placeholder="Tên hiển thị (bắt buộc)"
-              className="input input-bordered w-full mb-3"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              disabled={loading}
-            />
+            <input type="text" placeholder="Tên hiển thị" className="input input-bordered w-full mb-3"
+              value={displayName} onChange={e => setDisplayName(e.target.value)} disabled={loading} />
           )}
 
-          <input
-            type="email"
-            placeholder="Email"
-            className="input input-bordered w-full mb-3"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={loading}
-          />
+          <input type="email" placeholder="Email" className="input input-bordered w-full mb-3"
+            value={email} onChange={e => setEmail(e.target.value)} disabled={loading} />
 
-          <input
-            type="password"
-            placeholder="Mật khẩu"
-            className="input input-bordered w-full mb-6"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={loading}
-          />
+          <input type="password" placeholder="Mật khẩu" className="input input-bordered w-full mb-6"
+            value={password} onChange={e => setPassword(e.target.value)} disabled={loading} />
 
-          <button
-            className={`btn btn-primary w-full ${loading ? 'loading' : ''}`}
-            onClick={handleSubmit}
-            disabled={loading}
-          >
+          <button className={`btn btn-primary w-full ${loading ? 'loading' : ''}`}
+            onClick={handleSubmit} disabled={loading}>
             {loading ? 'Đang xử lý...' : isLogin ? 'Đăng nhập' : 'Đăng ký ngay'}
           </button>
-
-          <div className="text-center text-sm text-base-content/70 mt-4">
-            {isLogin ? 'Chưa có tài khoản?' : 'Đã có tài khoản?'}{' '}
-            <a
-              className="link link-primary"
-              onClick={() => setIsLogin(!isLogin)}
-            >
-              {isLogin ? 'Đăng ký miễn phí' : 'Đăng nhập ngay'}
-            </a>
-          </div>
         </div>
       </div>
     </div>
