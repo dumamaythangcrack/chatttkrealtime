@@ -8,10 +8,33 @@ export default function Login({ setToken, setUser }) {
   const [displayName, setDisplayName] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async () => {
-    if (!email || !password || (!isLogin && !displayName)) {
-      alert('Vui lòng điền đầy đủ thông tin!')
-      return
+    } catch (err) {
+      let msg = 'Lỗi không xác định, vui lòng thử lại'
+
+      // Xử lý mọi trường hợp backend trả lỗi lồng nhau
+      if (err.response?.data) {
+        const data = err.response.data
+
+        if (typeof data.error === 'string') {
+          msg = data.error
+        } else if (data.error?.message) {
+          msg = data.error.message
+        } else if (data.error?.msg) {
+          msg = data.error.msg
+        } else if (data.message) {
+          msg = data.message
+        } else if (data.msg) {
+          msg = data.msg
+        } else if (typeof data.error === 'object') {
+          msg = JSON.stringify(data.error) // fallback cuối cùng
+        }
+      } else if (err.message) {
+        msg = err.message
+      }
+
+      alert('Lỗi: ' + msg)
+    } finally {
+      setLoading(false)
     }
 
     setLoading(true)
